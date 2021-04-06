@@ -18,8 +18,12 @@ enum type_logo {
 	EINK_LOGO_CHARGING_4 = 1 << 6,
 	EINK_LOGO_CHARGING_5 = 1 << 7,
 	EINK_LOGO_CHARGING_LOWPOWER = 1 << 8,
+<<<<<<< HEAD
 	EINK_LOGO_POWEROFF = 1 << 9,
 	EINK_LOGO_UNMIRROR_TEMP_BUF = 1 << 10,
+=======
+	EINK_LOGO_UNMIRROR_TEMP_BUF = 1 << 9,
+>>>>>>> 4f14f98f36 (video/rk_eink: add ebook panel mirror support.)
 };
 
 enum update_mode {
