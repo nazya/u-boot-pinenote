@@ -721,7 +721,6 @@ static int charge_animation_show(struct udevice *dev)
 			 * ebc need to wait irq to indicate frame is complete.
 			 */
 			local_irq_enable();
-
 			ret = rockchip_eink_show_charge_logo(EINK_LOGO_POWEROFF);
 			if (ret != 0)
 				printf("Eink display reset logo failed\n");
