@@ -1091,7 +1091,7 @@ static int charge_animation_probe(struct udevice *dev)
 	}
 
 	/* Get PWRKEY: used for wakeup and turn off/on LCD */
-	if (!key_exist(KEY_POWER)) {
+	if (key_read(KEY_POWER) == KEY_NOT_EXIST) {
 		debug("Can't find power key\n");
 		return -EINVAL;
 	}
