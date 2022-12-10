@@ -27,6 +27,7 @@ struct ebc_tcon_priv {
 	u32 reg_len;
 	void *grf;
 	void *pmugrf;
+	struct clk dclk;
 };
 
 #define msleep(a)		udelay((a) * 1000)
@@ -149,8 +150,8 @@ enum ebc_win_data_fmt {
 
 #ifdef CONFIG_IRQ
 #define IRQ_EBC			49
-static volatile int frame_done;
 #endif
+static volatile int last_frame_done = -1;
 static inline void regs_dump(struct ebc_tcon_priv *tcon)
 {
 	int i;
@@ -240,7 +241,7 @@ static void ebc_irq_handler(int irq, void *data)
 	if (intr_status & DSP_END_INT) {
 		tcon_update_bits(tcon, EBC_INT_STATUS,
 				 DSP_END_INT_CLR, DSP_END_INT_CLR);
-		frame_done = 1;
+		last_frame_done = 1;
 	}
 }
 #endif
@@ -252,12 +253,13 @@ static inline void tcon_cfg_done(struct ebc_tcon_priv *tcon)
 
 static int ebc_tcon_enable(struct udevice *dev, struct ebc_panel *panel)
 {
+	int ret;
 	struct ebc_tcon_priv *tcon = dev_get_priv(dev);
 
 	/* panel timing and win info config */
 	tcon_write(tcon, EBC_DSP_HTIMING0,
 		   DSP_HTOTAL(panel->lsl + panel->lbl + panel->ldl +
-			      panel->lel) | DSP_HS_END(panel->lsl + 2));
+			      panel->lel) | DSP_HS_END(panel->lsl));
 	tcon_write(tcon, EBC_DSP_HTIMING1,
 		   DSP_HACT_END(panel->lsl + panel->lbl + panel->ldl) |
 		   DSP_HACT_ST(panel->lsl + panel->lbl - 1));
@@ -323,6 +325,12 @@ static int ebc_tcon_enable(struct udevice *dev, struct ebc_panel *panel)
 		   DSP_SDCLK_DIV(panel->panel_16bit ? 7 : 3));
 
 	tcon_cfg_done(tcon);
+
+	ret = clk_set_rate(&tcon->dclk, panel->sdck * ((panel->panel_16bit ? 7 : 3) + 1));
+	if (ret < 0) {
+		printf("%s: set clock rate failed, %d\n", __func__, ret);
+		return ret;
+	}
 
 	return 0;
 }
@@ -408,17 +416,23 @@ static int wait_for_last_frame_complete(struct udevice *dev)
 	struct ebc_tcon_priv *tcon = dev_get_priv(dev);
 
 #ifdef CONFIG_IRQ
-	while (!frame_done)
+	while (1) {
+		if ((last_frame_done == -1) || (last_frame_done == 1))
+			break;
 		msleep(1);
-	frame_done = 0;
+	}
 #else
 	/* wait for frame display end*/
-	do {
-		msleep(1);
+	while (1) {
+		/* first frame don't need to wait*/
+		if (last_frame_done == -1)
+			break;
 		intr_status = readl(tcon->reg + EBC_INT_STATUS);
-	} while (!(intr_status & DSP_END_INT));
+		if (intr_status & DSP_END_INT)
+			break;
+		msleep(1);
+	}
 #endif
-
 	tcon_update_bits(tcon, EBC_INT_STATUS,
 			 DSP_END_INT_CLR, DSP_END_INT_CLR);
 
@@ -437,7 +451,7 @@ static int ebc_tcon_frame_start(struct udevice *dev, int frame_total)
 
 	tcon_update_bits(tcon, EBC_DSP_START,
 			 DSP_FRM_START_MASK, DSP_FRM_START);
-
+	last_frame_done = 0;
 	return 0;
 }
 
@@ -454,9 +468,11 @@ static int rk_ebc_tcon_probe(struct udevice *dev)
 	}
 
 	priv->dev = dev;
-	ret = clk_set_defaults(dev);
-	if (ret)
-		printf("%s clk_set_defaults failed %d\n", __func__, ret);
+	ret = clk_get_by_index(dev, 1, &priv->dclk);
+	if (ret < 0) {
+		printf("%s get clock fail! %d\n", __func__, ret);
+		return -EINVAL;
+	}
 
 #ifdef CONFIG_IRQ
 	irq_install_handler(IRQ_EBC, ebc_irq_handler, dev);
