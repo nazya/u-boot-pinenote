@@ -7,6 +7,10 @@
 #include <common.h>
 #include <dm.h>
 #include <key.h>
+#include <input.h>
+#include <stdio_dev.h>
+
+static struct input_config button_input;
 
 static int adc_key_ofdata_to_platdata(struct udevice *dev)
 {
@@ -55,9 +59,68 @@ static int adc_key_ofdata_to_platdata(struct udevice *dev)
 	return 0;
 }
 
+static int adc_key_getc(struct stdio_dev *dev){
+	return input_getc(&button_input);
+}
+
+static int adc_key_tstc(struct stdio_dev *dev){
+	return input_tstc(&button_input);
+}
+
+
+static int adc_keys_read_keys(struct input_config *input){
+	int key = KEY_D;
+	int key_send = KEY_DOWN;
+	if (key_is_pressed(key_read(key))){
+		input_send_keycodes(&button_input, &key_send, 1);
+		return 1;
+	}
+	return 0;
+}
+
+static int adc_probe(struct udevice *dev1){
+	printf("adc_probe\n");
+	int error;
+	struct stdio_dev dev = {
+		.name	= "mag_key",
+		.flags	= DEV_FLAGS_INPUT,
+		.getc	= adc_key_getc,
+		.tstc	= adc_key_tstc,
+		.priv = dev1,
+	};
+
+	/* * @param repeat_delay_ms   Delay before key auto-repeat starts (in ms) */
+	/* * @param repeat_rate_ms    Delay between successive key repeats (in ms) */
+	input_set_delays(&button_input, 500, 500);
+	struct dm_key_uclass_platdata *uc_key;
+	uc_key = dev_get_uclass_platdata(dev1);
+	if (!uc_key){
+		printf("adc_probe: cannot get dev_get_uclass_platdata\n");
+		return -1;
+	}
+	printf("uc_key: %s\n", uc_key->name);
+
+	error = input_init(&button_input, 0);
+	if (error) {
+		debug("%s: ADC KEY Cannot set up input\n", __func__);
+		return -1;
+	}
+	input_add_tables(&button_input, false);
+	button_input.read_keys = adc_keys_read_keys;
+
+	error = input_stdio_register(&dev);
+	if (error)
+		return error;
+	input_set_delays(&button_input, 500, 500);
+
+	return 0;
+}
+
+
 U_BOOT_DRIVER(adc_key) = {
 	.name   = "adc_key",
 	.id     = UCLASS_KEY,
+	.probe = adc_probe,
 	.ofdata_to_platdata = adc_key_ofdata_to_platdata,
 };
 
