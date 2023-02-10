@@ -11,6 +11,9 @@
 #include <watchdog.h>
 #include <malloc.h>
 #include <linux/string.h>
+#ifdef CONFIG_ROCKCHIP_EINK_DISPLAY
+#include <rk_eink.h>
+#endif
 
 /* maximum bootmenu entries */
 #define MAX_COUNT	99
@@ -208,17 +211,25 @@ static char *bootmenu_choice_entry(void *data)
 		case KEY_UP:
 			if (menu->active > 0)
 				--menu->active;
+			rockchip_eink_show_menu_entry(1 << (11 + menu->active));
 			/* no menu key selected, regenerate menu */
 			return NULL;
 		case KEY_DOWN:
-			if (menu->active < menu->count - 1)
+			if (menu->active < menu->count - 1){
 				++menu->active;
+				rockchip_eink_show_menu_entry(1 << (11 + menu->active));
+			}
+			else if (menu->active == menu->count - 1){
+				menu->active = 0;
+				rockchip_eink_show_menu_entry(1 << (11 + menu->active));
+			}
 			/* no menu key selected, regenerate menu */
 			return NULL;
 		case KEY_SELECT:
 			iter = menu->first;
 			for (i = 0; i < menu->active; ++i)
 				iter = iter->next;
+			rockchip_eink_show_menu_entry(EINK_LOGO_UBOOT);
 			return iter->key;
 		default:
 			break;
@@ -397,6 +408,7 @@ static void bootmenu_show(int delay)
 			goto cleanup;
 	}
 
+	rockchip_eink_show_menu_entry(1 << 11);
 	/* Default menu entry is always first */
 	menu_default_set(menu, "0");
 
