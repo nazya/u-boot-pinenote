@@ -20,6 +20,12 @@ enum type_logo {
 	EINK_LOGO_CHARGING_LOWPOWER = 1 << 8,
 	EINK_LOGO_POWEROFF = 1 << 9,
 	EINK_LOGO_UNMIRROR_TEMP_BUF = 1 << 10,
+	EINK_BOOTMENU_1 = 1 << 11,
+	EINK_BOOTMENU_2 = 1 << 12,
+	EINK_BOOTMENU_3 = 1 << 13,
+	EINK_BOOTMENU_4 = 1 << 14,
+	EINK_BOOTMENU_5 = 1 << 15,
+	EINK_BOOTMENU_6 = 1 << 16,
 };
 
 enum update_mode {
@@ -29,5 +35,6 @@ enum update_mode {
 
 int rockchip_eink_show_uboot_logo(void);
 int rockchip_eink_show_charge_logo(int logo_type);
+int rockchip_eink_show_menu_entry(int logo_type);
 
 #endif

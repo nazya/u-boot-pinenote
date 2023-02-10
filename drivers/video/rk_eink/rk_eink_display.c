@@ -77,10 +77,11 @@ struct grayscale_header {
  * The start address of logo image in logo.img must be aligned in 512 bytes,
  * so the header size must be times of 512 bytes. Here we fix the size to 512
  * bytes, so the count of logo image can only support up to 14.
+ * UPDATE: Fixed to 1024 bytes with 30 logos, 32 mb total size
  */
 struct logo_info {
 	struct logo_part_header part_hdr;
-	struct grayscale_header img_hdr[14];
+	struct grayscale_header img_hdr[30];
 } __packed;
 
 struct rockchip_eink_display_priv {
@@ -222,6 +223,12 @@ static int get_addr_by_type(struct udevice *dev, u32 logo_type)
 	 * non-mirror image data.
 	 */
 	case EINK_LOGO_UNMIRROR_TEMP_BUF:
+	case EINK_BOOTMENU_1:
+	case EINK_BOOTMENU_2:
+	case EINK_BOOTMENU_3:
+	case EINK_BOOTMENU_4:
+	case EINK_BOOTMENU_5:
+	case EINK_BOOTMENU_6:
 		return (plat->disp_pbuf + offset);
 	default:
 		printf("invalid logo type[%d]\n", logo_type);
@@ -237,7 +244,7 @@ static int read_header(struct blk_desc *dev_desc,
 	int i;
 	struct logo_part_header *part_hdr = &header->part_hdr;
 
-	if (blk_dread(dev_desc, part->start, 1, header) != 1)
+	if (blk_dread(dev_desc, part->start, 2, header) != 2)
 		return -EIO;
 
 	if (memcmp(part_hdr->magic, EINK_LOGO_PART_MAGIC, 4)) {
@@ -673,6 +680,12 @@ static int rockchip_eink_show_logo(int cur_logo_type, int update_mode)
 
 out:
 	return ret;
+}
+
+
+int rockchip_eink_show_menu_entry(int logo_type)
+{
+	return rockchip_eink_show_logo(logo_type, EINK_UPDATE_DIFF);
 }
 
 int rockchip_eink_show_uboot_logo(void)
