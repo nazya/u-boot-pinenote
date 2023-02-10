@@ -273,7 +273,7 @@ __weak int rockchip_dnl_key_pressed(void)
 
 #elif defined(CONFIG_ADC)
 	const void *blob = gd->fdt_blob;
-	int node, ret, channel = 1;
+	int node, ret, channel = 0;
 	u32 val, chns[2];
 
 	node = fdt_node_offset_by_compatible(blob, 0, "adc-keys");
