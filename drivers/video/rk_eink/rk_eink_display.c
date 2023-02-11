@@ -99,7 +99,7 @@ enum {
 
 #define EINK_VCOM_ID		17
 #define EINK_VCOM_MAX		64
-#define VCOM_DEFAULT_VALUE	930
+#define VCOM_DEFAULT_VALUE	1650
 
 static struct logo_info eink_logo_info;
 static struct udevice *eink_dev;
@@ -120,7 +120,6 @@ static int read_vcom_from_vendor(void)
 		return ret;
 	}
 
-	return 930;
 	return atoi(vcom_str);
 }
 
@@ -758,7 +757,6 @@ static int rockchip_eink_display_probe(struct udevice *dev)
 		struct rk_ebc_pwr_ops *pwr_ops;
 
 		pwr_ops = ebc_pwr_get_ops(priv->ebc_pwr_dev);
-		printf("setting vcom to %i\n", priv->vcom);
 		ret = pwr_ops->vcom_set(priv->ebc_pwr_dev, priv->vcom);
 		if (ret) {
 			printf("%s, vcom_set failed\n", __func__);
