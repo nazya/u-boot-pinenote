@@ -91,6 +91,15 @@
          regulator-min-microvolt = <3800000>;
          regulator-max-microvolt = <3800000>;
      };
+
+	osd_eink {
+		u-boot,dm-pre-reloc;
+		status="okay";
+		compatible = "pinenote,osd";
+
+		touchscreen = <&touchscreen>;
+	};
+
 };
 
 &crypto {
@@ -335,11 +344,12 @@
 			};
 
 			vcc3v3_pmu: LDO_REG6 {
-		u-boot,dm-pre-reloc;
+				u-boot,dm-pre-reloc;
 			    regulator-always-on;
 			    regulator-boot-on;
 			    regulator-min-microvolt = <3300000>;
 			    regulator-max-microvolt = <3300000>;
+			    regulator-init-microvolt = <3300000>;
 			    regulator-name = "vcc3v3_pmu";
 			    regulator-state-mem {
 			        regulator-on-in-suspend;
@@ -491,8 +501,54 @@
 	};
 };
 
+&i2c5 {
+	status = "okay";
+	u-boot,dm-pre-reloc;
+
+	touchscreen: touchscreen@24 {
+	    compatible = "cypress,tma448";
+		u-boot,dm-pre-reloc;
+		status = "okay";
+	    hid-descr-addr = <0x1>;
+	    reg = <0x24>;
+	    /* interrupt-parent = <&gpio0>; */
+	    /* interrupts = <RK_PA6 IRQ_TYPE_LEVEL_LOW>; */
+	    interrupt-gpios = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
+	    pinctrl-0 = <&ts_int_l>, <&ts_rst_l>;
+	    pinctrl-names = "default";
+	    reset-gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
+	    vdd-supply = <&vcc3v3_pmu>;
+	    touchscreen-max-pressure = <46>;
+	    touchscreen-min-x = <10>;
+	    touchscreen-min-y = <5>;
+	    touchscreen-size-x = <1863>;
+	    touchscreen-size-y = <1399>;
+	    touchscreen-x-mm = <1864>;
+	    touchscreen-y-mm = <1400>;
+	};
+
+};
+
+&i2c5m0_xfer {
+		u-boot,dm-pre-reloc;
+};
+
 &pinctrl {
 	u-boot,dm-pre-reloc;
+	touchscreen {
+		u-boot,dm-pre-reloc;
+	    ts_int_l: ts-int-l {
+			u-boot,dm-pre-reloc;
+			bias-pull-up;
+	        rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>;
+	    };
+
+	    ts_rst_l: ts-rst-l {
+			u-boot,dm-pre-reloc;
+	        rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
+	    };
+	};
+
     hall {
         hall_int_l: hall-int-l {
             rockchip,pins = <0 RK_PC7 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -588,4 +644,5 @@
 &i2c3m1_xfer{
 	u-boot,dm-pre-reloc;
 };
+
 #include "rk3566-pinenote-v1.2-u-boot.dtsi"
