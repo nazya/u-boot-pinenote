@@ -24,6 +24,14 @@ obj-$(CONFIG_ADC_KEY) += adc_key.o
 obj-$(CONFIG_GPIO_KEY) += gpio_key.o
 obj-$(CONFIG_RK_KEY) += rk_key.o
 obj-$(CONFIG_RK8XX_PWRKEY) += rk8xx_pwrkey.o
+ifdef CONFIG_CYTTSP5UB
+# obj-y += cyttsp5ub.o
+obj-$(CONFIG_CYTTSP5UB) += cyttsp5ub.o
+endif
+ifdef CONFIG_OSD_EINK
+	obj-$(CONFIG_OSD_EINK) += osd_eink.o
+endif
+
 ifdef CONFIG_PS2KBD
 obj-y += keyboard.o pc_keyb.o
 obj-$(CONFIG_PS2MULT) += ps2mult.o ps2ser.o

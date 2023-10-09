@@ -130,3 +130,14 @@ config PWRKEY_DNL_TRIGGER_NUM
 	help
 	  This support enter download mode by press and release pwrkey for times
 	  over the trigger count. The default value 0 means disabled.
+
+config CYTTSP5UB
+	bool "Enable support for the cyttsp5 touchscreen i2c driver"
+	help
+	  This adds a driver for the cyttsp5 touchscreen driver conncted via i2c.
+
+config OSD_EINK
+	bool "Enable the on-screen keyboard"
+	depends on CYTTSP5UB
+	help
+		Enable the on-screen keyboard for the PineNote (eink+cyttsp5 touchscreen)
