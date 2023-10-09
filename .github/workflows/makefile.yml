@@ -1,0 +1,85 @@
+
+name: Build uboot image for the PineNote
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  compile_uboot:
+    runs-on: ubuntu-latest
+    name: compile uboot for the PineNote
+    steps:
+      - name: Prepare environment
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential crossbuild-essential-arm64 device-tree-compiler python3-pyelftools
+      - name: Checkout rkbin
+        run: |
+          test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
+          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub --depth 1 https://github.com/m-weigand/u-boot-pinenote
+          cd u-boot-pinenote
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          make clean;
+          make rk3566-pinenote_defconfig;
+          ./make.sh
+          ./make.sh trust
+      - name: Upload files
+        uses: actions/upload-artifact@v3
+        with:
+          name: uboot-files
+          path: |
+            u-boot-pinenote/uboot.img
+            u-boot-pinenote/trust.img
+            u-boot-pinenote/idblock.bin
+
+  generate_spl_boot_file:
+    runs-on: ubuntu-latest
+    name: Geneate rk356x_spl_loader_v1.12.112.bin
+    steps:
+      - name: Prepare environment
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential crossbuild-essential-arm64 device-tree-compiler python3-pyelftools
+      - name: Checkout rkbin
+        run: |
+          test -d rkbin && rm -rf rkbin
+          git clone --shallow-since="2022-01-02T00:00:00Z" https://github.com/rockchip-linux/rkbin
+          cd rkbin
+          git checkout b6354b9
+          tools/boot_merger RKBOOT/RK3566MINIALL.ini
+      - name: Upload files
+        uses: actions/upload-artifact@v3
+        with:
+          name: rk356x_spl_loader_v1.12.112.bin
+          path: |
+            rkbin/rk356x_spl_loader_v1.12.112.bin
+
+  do_release:
+    # if: startsWith(github.ref, 'refs/tags/')
+    # if: contains(github.ref, "main")
+    runs-on: ubuntu-latest
+    needs:
+      - build_images
+      - create_data_partition_dummy
+      - compile_uboot
+      - generate_spl_boot_file
+    steps:
+      - name: Clone workflow repository
+        uses: actions/checkout@v3
+      - name: Download image artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts/
+      - name: Make release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          draft: true
+          files: |
+            artifacts/rk356x_spl_loader_v1.12.112.bin/rk356x_spl_loader_v1.12.112.bin
+            artifacts/uboot-files/uboot.img
+            artifacts/uboot-files/trust.img
+            artifacts/uboot-files/idblock.bin
