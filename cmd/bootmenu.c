@@ -211,25 +211,27 @@ static char *bootmenu_choice_entry(void *data)
 		case KEY_UP:
 			if (menu->active > 0)
 				--menu->active;
+			else if (menu->active == 0)
+				menu->active = menu->count - 1;
+
 			rockchip_eink_show_menu_entry(1 << (11 + menu->active));
 			/* no menu key selected, regenerate menu */
 			return NULL;
 		case KEY_DOWN:
 			if (menu->active < menu->count - 1){
 				++menu->active;
-				rockchip_eink_show_menu_entry(1 << (11 + menu->active));
 			}
 			else if (menu->active == menu->count - 1){
 				menu->active = 0;
-				rockchip_eink_show_menu_entry(1 << (11 + menu->active));
 			}
+			rockchip_eink_show_menu_entry(1 << (11 + menu->active));
 			/* no menu key selected, regenerate menu */
 			return NULL;
 		case KEY_SELECT:
 			iter = menu->first;
 			for (i = 0; i < menu->active; ++i)
 				iter = iter->next;
-			rockchip_eink_show_menu_entry(EINK_LOGO_UBOOT);
+			rockchip_eink_show_menu_entry(EINK_LOGO_KERNEL);
 			return iter->key;
 		default:
 			break;
