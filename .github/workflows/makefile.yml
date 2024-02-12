@@ -122,7 +122,7 @@ jobs:
           path: artifacts/
       - name: debug
         run: |
-          ls artifacts/*
+          ls artifacts/*/*
       - name: Make release
         uses: softprops/action-gh-release@v0.1.15
         with:
@@ -132,9 +132,9 @@ jobs:
             artifacts/uboot-files/uboot.img
             artifacts/uboot-files/trust.img
             artifacts/uboot-files/idblock.bin
-            artifacts/uboot-files-cyttsp5_ram1560mhz/uboot_1560mhz.img
-            artifacts/uboot-files-cyttsp5_ram1560mhz/trust_1560mhz.img
-            artifacts/uboot-files-cyttsp5_ram1560mhz/idblock_1560mhz.bin
+            artifacts/uboot-files-cyttsp5_ram1560mhz/u-boot-pinenote/uboot_1560mhz.img
+            artifacts/uboot-files-cyttsp5_ram1560mhz/u-boot-pinenote/trust_1560mhz.img
+            artifacts/uboot-files-cyttsp5_ram1560mhz/u-boot-pinenote/idblock_1560mhz.bin
             artifacts/uboot-files-cyttsp5_ram1560mhz/sha256_uboot_1560mhz.img.txt
             artifacts/uboot-files-cyttsp5_ram1560mhz/sha256_trust_1560mhz.img.txt
             artifacts/uboot-files-cyttsp5_ram1560mhz/sha256_idblock_1560mhz.bin.txt
