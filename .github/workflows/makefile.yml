@@ -18,8 +18,10 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install build-essential crossbuild-essential-arm64 device-tree-compiler python3-pyelftools
       - name: Checkout rkbin
+
+        # test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
         run: |
-          test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
+          test -d rkbin || git clone --depth 1 --branch master https://github.com/m-weigand/rkbin.git
           test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub --depth 1 https://github.com/m-weigand/u-boot-pinenote
           cd u-boot-pinenote
           export CROSS_COMPILE=aarch64-linux-gnu-
