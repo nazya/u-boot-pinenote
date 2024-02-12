@@ -38,6 +38,40 @@ jobs:
             u-boot-pinenote/trust.img
             u-boot-pinenote/idblock.bin
 
+  compile_uboot_cyttsp5_ram_1560mhz:
+    runs-on: ubuntu-latest
+    name: compile uboot for the PineNote, touch enabled, with 1560 MHz RAM blob
+    steps:
+      - name: Prepare environment
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential crossbuild-essential-arm64 device-tree-compiler python3-pyelftools
+      - name: Checkout rkbin
+
+        # test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
+        run: |
+          test -d rkbin || git clone --depth 1 --branch master https://github.com/m-weigand/rkbin.git
+          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub_1560mhz --depth 1 https://github.com/m-weigand/u-boot-pinenote
+          cd u-boot-pinenote
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          make clean;
+          make rk3566-pinenote_defconfig;
+          ./make.sh
+          ./make.sh trust
+      - name: rename files
+        run: |
+            mv u-boot-pinenote/uboot.img u-boot-pinenote/uboot_1560mhz.img
+            mv u-boot-pinenote/trust.img u-boot-pinenote/trust_1560mhz.img
+            mv u-boot-pinenote/idblock.bin u-boot-pinenote/idblock_1560mhz.bin
+      - name: Upload files
+        uses: actions/upload-artifact@v3
+        with:
+          name: uboot-files-cyttsp5_ram1560mhz
+          path: |
+            u-boot-pinenote/uboot_1560mhz.img
+            u-boot-pinenote/trust_1560mhz.img
+            u-boot-pinenote/idblock_1560mhz.bin
+
   generate_spl_boot_file:
     runs-on: ubuntu-latest
     name: Geneate rk356x_spl_loader_v1.12.112.bin
@@ -66,6 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compile_uboot
+      - compile_uboot_cyttsp5_ram_1560mhz
+      - generate_spl_boot_file
     steps:
       - name: Clone workflow repository
         uses: actions/checkout@v3
@@ -82,3 +118,6 @@ jobs:
             artifacts/uboot-files/uboot.img
             artifacts/uboot-files/trust.img
             artifacts/uboot-files/idblock.bin
+            artifacts/uboot-files-cyttsp5_ram1560mhz/uboot_1560mhz.img
+            artifacts/uboot-files-cyttsp5_ram1560mhz/trust_1560mhz.img
+            artifacts/uboot-files-cyttsp5_ram1560mhz/idblock_1560mhz.bin
