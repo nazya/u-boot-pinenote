@@ -63,6 +63,12 @@ jobs:
             mv u-boot-pinenote/uboot.img u-boot-pinenote/uboot_1560mhz.img
             mv u-boot-pinenote/trust.img u-boot-pinenote/trust_1560mhz.img
             mv u-boot-pinenote/idblock.bin u-boot-pinenote/idblock_1560mhz.bin
+      - name: generate sha256 checksums
+        run: |
+            sha256sum u-boot-pinenote/uboot_1560mhz.img > sha256_uboot_1560mhz.img.txt
+            sha256sum u-boot-pinenote/trust_1560mhz.img > trust_1560mhz.img.txt
+            sha256sum u-boot-pinenote/idblock_1560mhz.bin > idblock_1560mhz.bin.txt
+
       - name: Upload files
         uses: actions/upload-artifact@v3
         with:
@@ -71,6 +77,10 @@ jobs:
             u-boot-pinenote/uboot_1560mhz.img
             u-boot-pinenote/trust_1560mhz.img
             u-boot-pinenote/idblock_1560mhz.bin
+            sha256_uboot_1560mhz.img.txt
+            trust_1560mhz.img.txt
+            idblock_1560mhz.bin.txt
+
 
   generate_spl_boot_file:
     runs-on: ubuntu-latest
@@ -121,3 +131,6 @@ jobs:
             artifacts/uboot-files-cyttsp5_ram1560mhz/uboot_1560mhz.img
             artifacts/uboot-files-cyttsp5_ram1560mhz/trust_1560mhz.img
             artifacts/uboot-files-cyttsp5_ram1560mhz/idblock_1560mhz.bin
+            artifacts/uboot-files-cyttsp5_ram1560mhz/sha256_uboot_1560mhz.img.txt
+            artifacts/uboot-files-cyttsp5_ram1560mhz/trust_1560mhz.img.txt
+            artifacts/uboot-files-cyttsp5_ram1560mhz/idblock_1560mhz.bin.txt
