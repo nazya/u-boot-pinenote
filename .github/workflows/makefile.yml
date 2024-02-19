@@ -22,7 +22,7 @@ jobs:
         # test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
         run: |
           test -d rkbin || git clone --depth 1 --branch master https://github.com/m-weigand/rkbin.git
-          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub --depth 1 https://github.com/m-weigand/u-boot-pinenote
+          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub --depth 1 https://github.com/nazya/u-boot-pinenote
           cd u-boot-pinenote
           export CROSS_COMPILE=aarch64-linux-gnu-
           make clean;
@@ -51,7 +51,7 @@ jobs:
         # test -d rkbin || git clone --depth 1 --branch master https://github.com/rockchip-linux/rkbin.git
         run: |
           test -d rkbin || git clone --depth 1 --branch master https://github.com/m-weigand/rkbin.git
-          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub_1560mhz --depth 1 https://github.com/m-weigand/u-boot-pinenote
+          test -d u-boot-pinenote || git clone --branch branch_cyttsp5ub_1560mhz --depth 1 https://github.com/nazya/u-boot-pinenote
           cd u-boot-pinenote
           export CROSS_COMPILE=aarch64-linux-gnu-
           make clean;
