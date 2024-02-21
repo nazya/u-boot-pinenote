@@ -88,7 +88,7 @@
 	"bootcmd=setenv stdin serial,pwr_key_stdin,touch_keys; bootmenu 15\0" \
 	"bootmenu_0=Boot Linux=sysboot mmc 0:11 any ${scriptaddr} /boot/extlinux/extlinux.conf\0" \
 	"bootmenu_1=Boot Android=boot_android mmc 0\0" \
-	"bootmenu_2=Search for extlinux.conf on all partitions=run scan_dev_for_boot_part\0" \
+	"bootmenu_2=Reboot=reboot\0" \
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	ENV_MEM_LAYOUT_SETTINGS \
